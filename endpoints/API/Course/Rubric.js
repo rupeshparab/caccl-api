@@ -43,11 +43,22 @@ Rubric.list.requiredParams = ['courseId'];
  * @memberof api.course.rubric
  * @instance
  * @param {object} options - object containing all arguments
- * @param {number} options.courseId - Canvas course Id to add the rubric to
- * @param {number} options.rubricId - Canvas course Id to add the rubric to
- * @param {boolean} [options.include=null] - Allowed values: ['assessments',
- *   'graded_assessments', 'peer_assessments']. If excluded, no assessments
- *   will be included (default: none)
+ * @param {number} options.courseId - Canvas course Id to look up rubric in
+ * @param {number} options.rubricId - Canvas rubric Id to look up
+ * @param {boolean} [options.includeAssessments] - if true, assessments are
+ *   included
+ * @param {boolean} [options.includeGradedAssessments] - if true, graded
+ *   assessments are included
+ * @param {boolean} [options.includePeerAssessments] - if true, peer assessments
+ *   are included
+ * @param {boolean} [options.includeAssociations] - if true, associations
+ *   are included
+ * @param {boolean} [options.includeAssignmentAssociations] - if true,
+ *   assignment associations are included
+ * @param {boolean} [options.includeCourseAssociations] - if true, course
+ *   associations are included
+ * @param {boolean} [options.includeAccountAssociations] - if true, account
+ *   associations are included
  * @param {string} [options.assessmentStyle=both omitted] - Allowed values:
  *   ['full','comments_only']
  *   (full = entire assessment, comments_only = only comment part of
@@ -59,7 +70,15 @@ Rubric.get = function (options) {
     path: `${prefix.v1}/courses/${options.courseId}/rubrics/${options.rubricId}`,
     method: 'GET',
     params: {
-      include: utils.includeIfTruthy(options.include),
+      include: utils.genIncludesList({
+        assessments: options.includeAssessments,
+        graded_assessments: options.includeGradedAssessments,
+        peer_assessments: options.includePeerAssessments,
+        associations: options.includeAssociations,
+        assignment_associations: options.includeAssignmentAssociations,
+        course_associations: options.includeCourseAssociations,
+        account_associations: options.includeAccountAssociations,
+      }),
       style: utils.includeIfTruthy(options.assessmentStyle),
     },
   });
@@ -68,49 +87,64 @@ Rubric.get.action = 'get info on a specific rubric in a course';
 Rubric.get.requiredParams = ['courseId', 'rubricId'];
 
 /**
- * Creates a new rubric for grading with free form comments enabled and add it
- *   to an assignment in a course.
- * @version unlisted
+ * Creates a free-form rubric for grading with free form comments enabled
  * @author Gabriel Abrams
- * @method createFreeFormGradingRubricInAssignment
+ * @method createFreeFormRubric
  * @memberof api.course.rubric
  * @instance
  * @param {object} options - object containing all arguments
  * @param {number} options.courseId - Canvas course Id to add the rubric to
- * @param {number} options.assignmentId - Canvas course Id to add the rubric to
- * @param {array} options.rubricItems - List of rubric item objects:
- *   [{description, points, [longDescription]}, ...]
- * @param {string} [options.title=generated title] - Title of the new rubric
+ * @param {string} [options.title=generated title] - the title of the
+ *   rubric. If assignmentId is included, the default value for this is
+ *   'Assignment Rubric', otherwise it is 'Unnamed Rubric'
+ * @param {number} [options.assignmentId] - an assignment in the course to
+ *   associate this rubric with. If excluded, the rubric is associated with the
+ *   course as a whole
+ * @param {boolean} [options.dontUseForGrading=false] - if true, then the rubric
+ *   is not used for grading
+ * @param {boolean} [options.hideScoreTotal=false] - if true, then the rubric
+ *   total is hidden from students
+ * @param {object[]} [options.rubricItems=[]] - a list of rubric items in the
+ *   form { description, points, longDescription }. If points is not included,
+ *   it is assumed to be 1 point.
  * @return {Promise.<Object>} Canvas Rubric {@link https://canvas.instructure.com/doc/api/rubrics.html#Rubric}
  */
-Rubric.createFreeFormGradingRubricInAssignment = function (options) {
-  // Infer points possible based on the rubric items
-  let pointsPossible = 0;
-  options.rubricItems.forEach((rubricItem) => {
-    pointsPossible += rubricItem.points;
-  });
+Rubric.createFreeFormRubric = function (options) {
+  const {
+    courseId,
+    rubricItems,
+    dontUseForGrading,
+    hideScoreTotal,
+  } = options;
+
+  // Choose association type
+  const associationType = (
+    options.assignmentId
+      ? 'Assignment'
+      : 'Course'
+  );
+
   // Set title
   const title = (
     options.title
-    || 'Unnamed-rubric-' + Date.now()
+    || (
+      options.assignmentId
+        ? 'Assignment Rubric'
+        : 'Unnamed Rubric'
+    )
   );
+
   const params = {
-    title,
     'rubric[title]': title,
-    'rubric[points_possible]': pointsPossible,
-    'rubric_association[use_for_grading]': 1,
-    'rubric_association[hide_score_total]': 0,
-    'rubric_association[hide_points]': 0,
-    'rubric_association[hide_outcome_results]': 0,
+    'rubric_association[use_for_grading]': !dontUseForGrading,
+    'rubric_association[hide_score_total]': utils.isTruthy(hideScoreTotal),
     'rubric[free_form_criterion_comments]': 1,
-    points_possible: pointsPossible,
-    rubric_id: 'new',
-    'rubric_association[association_type]': 'Assignment',
-    'rubric_association[association_id]': options.assignmentId,
+    'rubric_association[association_type]': associationType,
+    'rubric_association[association_id]':
+      utils.includeIfTruthy(options.assignmentId),
     'rubric_association[purpose]': 'grading',
-    skip_updating_points_possible: false,
   };
-  options.rubricItems.forEach((rubricItem, i) => {
+  (rubricItems || []).forEach((rubricItem, i) => {
     params[`rubric[criteria][${i}][description]`] = (
       rubricItem.description
     );
@@ -127,31 +161,123 @@ Rubric.createFreeFormGradingRubricInAssignment = function (options) {
     params[`rubric[criteria][${i}][ratings][0][points]`] = (
       rubricItem.points
     );
-    params[`rubric[criteria][${i}][ratings][0][id]`] = 'blank';
     params[`rubric[criteria][${i}][ratings][1][description]`] = (
       'No Marks'
     );
     params[`rubric[criteria][${i}][ratings][1][points]`] = 0;
-    params[`rubric[criteria][${i}][ratings][1][id]`] = 'blank_2';
   });
   return this.visitEndpoint({
     params,
-    path: `${prefix.v1}/courses/${options.courseId}/rubrics`,
+    path: `${prefix.v1}/courses/${courseId}/rubrics`,
     method: 'POST',
   })
     .then((response) => {
-      // Response is of form { rubric: <rubric object> } for no reason
+      // Response is of form { rubric: <rubric object>, ... }
       // We just extract that rubric object
       const { rubric } = response;
       return Promise.resolve(rubric);
     });
 };
-Rubric.createFreeFormGradingRubricInAssignment.action = 'create a new free form grading rubric and add it to a specific assignment in a course';
-Rubric.createFreeFormGradingRubricInAssignment.requiredParams = [
-  'courseId',
-  'assignmentId',
-  'rubricItems',
-];
+Rubric.createFreeFormRubric.action = 'create a new free form rubric in a course';
+Rubric.createFreeFormRubric.requiredParams = ['courseId'];
+
+/**
+ * Updates a free-form rubric for grading with free form comments enabled
+ * @author Gabriel Abrams
+ * @method updateFreeFormRubric
+ * @memberof api.course.rubric
+ * @instance
+ * @param {object} options - object containing all arguments
+ * @param {number} options.courseId - Canvas course Id to look in for the rubric
+ * @param {number} options.rubricId - Canvas rubric Id of the rubric to update
+ * @param {string} [options.title] - new title for the rubric
+ * @param {number} [options.assignmentId] - an assignment in the course to
+ *   associate this rubric with
+ * @param {boolean} [options.dontUseForGrading] - if true, then the rubric
+ *   is not used for grading
+ * @param {boolean} [options.hideScoreTotal] - if true, then the rubric
+ *   total is hidden from students
+ * @param {object[]} [options.rubricItems] - a new list of rubric items in the
+ *   form { description, points, longDescription }. If points is not included,
+ *   it is assumed to be 1 point.
+ * @return {Promise.<Object>} Canvas Rubric {@link https://canvas.instructure.com/doc/api/rubrics.html#Rubric}
+ */
+Rubric.updateFreeFormRubric = function (options) {
+  const {
+    courseId,
+    rubricId,
+    title,
+    assignmentId,
+    dontUseForGrading,
+    hideScoreTotal,
+    rubricItems,
+  } = options;
+
+  const params = {};
+
+  // Change title
+  if (title) {
+    params['rubric[title]'] = title;
+  }
+
+  // Change association
+  if (assignmentId) {
+    params['rubric_association[association_type]'] = 'Assignment';
+    params['rubric_association[association_id]'] = assignmentId;
+  }
+
+  // Change if this is for grading
+  if (dontUseForGrading !== undefined) {
+    params['rubric_association[use_for_grading]'] = !dontUseForGrading;
+  }
+
+  // Change hiding score total
+  if (hideScoreTotal !== undefined) {
+    params['rubric_association[hide_score_total]'] = (
+      utils.isTruthy(hideScoreTotal)
+    );
+  }
+
+  // Change rubric items
+  if (rubricItems) {
+    rubricItems.forEach((rubricItem, i) => {
+      params[`rubric[criteria][${i}][description]`] = (
+        rubricItem.description
+      );
+      params[`rubric[criteria][${i}][points]`] = (
+        rubricItem.points
+      );
+      params[`rubric[criteria][${i}][long_description]`] = (
+        rubricItem.longDescription
+      );
+      params[`rubric[criteria][${i}][criterion_use_range]`] = false;
+      params[`rubric[criteria][${i}][ratings][0][description]`] = (
+        'Full Marks'
+      );
+      params[`rubric[criteria][${i}][ratings][0][points]`] = (
+        rubricItem.points
+      );
+      params[`rubric[criteria][${i}][ratings][1][description]`] = (
+        'No Marks'
+      );
+      params[`rubric[criteria][${i}][ratings][1][points]`] = 0;
+    });
+  }
+
+  return this.visitEndpoint({
+    params,
+    path: `${prefix.v1}/courses/${courseId}/rubrics/${rubricId}`,
+    method: 'PUT',
+  })
+    .then((response) => {
+      // Response is of form { rubric: <rubric object>, ... }
+      // We just extract that rubric object
+      const { rubric } = response;
+      return Promise.resolve(rubric);
+    });
+};
+Rubric.updateFreeFormRubric.action = 'update a free form rubric in a course';
+Rubric.updateFreeFormRubric.requiredParams = ['courseId', 'rubricId'];
 
 /*------------------------------------------------------------------------*/
 /*                                 Export                                 */

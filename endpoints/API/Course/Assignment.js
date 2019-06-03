@@ -1161,6 +1161,34 @@ Assignment.createFileSubmission.requiredParams = [
   'filenames',
 ];
 
+/* --------------------------- Rubrics -------------------------- */
+
+/**
+ * Creates a free-form rubric for grading with free form comments enabled
+ * @author Gabriel Abrams
+ * @method createFreeFormRubric
+ * @memberof api.course.rubric
+ * @instance
+ * @param {object} options - object containing all arguments
+ * @param {number} options.courseId - Canvas course Id to add the rubric to
+ * @param {number} options.assignmentId - the assignment to add the rubric to
+ * @param {string} [options.title=Assignment Rubric] - the title of the
+ *   rubric
+ * @param {boolean} [options.dontUseForGrading=false] - if true, then the rubric
+ *   is not used for grading
+ * @param {boolean} [options.hideScoreTotal=false] - if true, then the rubric
+ *   total is hidden from students
+ * @param {object[]} [options.rubricItems=[]] - a list of rubric items in the
+ *   form { description, points, longDescription }. If points is not included,
+ *   it is assumed to be 1 point.
+ * @return {Promise.<Object>} Canvas Rubric {@link https://canvas.instructure.com/doc/api/rubrics.html#Rubric}
+ */
+Assignment.createFreeFormRubric = function (options) {
+  return this.api.course.rubric.createFreeFormRubric(options);
+};
+Assignment.createFreeFormRubric.action = 'create a new free form rubric in an assignment in a course';
+Assignment.createFreeFormRubric.requiredParams = ['courseId', 'assignmentId'];
+
 /*------------------------------------------------------------------------*/
 /*                                 Export                                 */
 /*------------------------------------------------------------------------*/
