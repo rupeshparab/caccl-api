@@ -51,6 +51,7 @@ module.exports = (config = {}) => {
     const method = (requestInfo.method || 'GET');
     const params = requestInfo.params || {};
     const { path } = requestInfo;
+    const headers = requestInfo.headers || {};
 
     /* -------------- Extract config and apply defaults ------------- */
     // dontCache - if truthy, does not cache the final result (must be true if
@@ -87,8 +88,10 @@ module.exports = (config = {}) => {
           method,
           params,
           itemsPerPage,
-          accessToken,
         });
+
+        // Add access token to headers
+        headers.Authorization = `Bearer ${accessToken}`;
 
         // We are using the cached value. Keep note of this
         usedCachedValue = false;
@@ -109,6 +112,7 @@ module.exports = (config = {}) => {
               numRetries,
               params: paramsWithPageNumber,
               path: apiPathPrefix + path,
+              headers,
               host: canvasHost,
               // Ignore self-signed certificate if host is simulated Canvas
               ignoreSSLIssues: (canvasHost === 'localhost:8088'),
@@ -157,6 +161,7 @@ module.exports = (config = {}) => {
                   try {
                     parsedBody = JSON.parse(response.body);
                   } catch (err) {
+                    console.log(err, response.body);
                     return reject(new CACCLError({
                       message: 'We couldn\'t understand Canvas\'s response because it was malformed. Please contact an admin if this continues to occur.',
                       code: errorCodes.malformed,

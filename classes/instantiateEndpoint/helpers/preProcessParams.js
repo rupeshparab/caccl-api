@@ -58,11 +58,6 @@ module.exports = (config) => {
   // Exclude params that have value equal to EXCLUDED_VALUE
   const newParams = _recursivelyExcludeParams(oldParams);
 
-  // Add access token to request (if we have one and one isn't already added)
-  if (config.accessToken && !newParams.access_token) {
-    newParams.access_token = config.accessToken;
-  }
-
   // Set up number of entries per page
   if (config.method === 'GET' && !newParams.per_page) {
     newParams.per_page = config.itemsPerPage;

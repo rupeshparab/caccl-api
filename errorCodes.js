@@ -5,7 +5,7 @@
  */
 
 // Highest errors:
-// > CAPI24
+// > CAPI25
 // > CANV14 (exclude 404, 500)
 
 module.exports = {
@@ -74,4 +74,7 @@ module.exports = {
   // course.quiz
   // > listQuestionGrades
   quizReportNoRows: 'CAPI21',
+
+  // ql
+  invalidSubmissionStructure: 'CAPI25',
 };
