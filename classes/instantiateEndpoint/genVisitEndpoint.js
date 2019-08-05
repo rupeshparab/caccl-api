@@ -161,7 +161,6 @@ module.exports = (config = {}) => {
                   try {
                     parsedBody = JSON.parse(response.body);
                   } catch (err) {
-                    console.log(err, response.body);
                     return reject(new CACCLError({
                       message: 'We couldn\'t understand Canvas\'s response because it was malformed. Please contact an admin if this continues to occur.',
                       code: errorCodes.malformed,
