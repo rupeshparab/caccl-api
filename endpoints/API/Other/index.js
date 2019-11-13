@@ -16,7 +16,10 @@ class Other extends EndpointCategory {
 /*------------------------------------------------------------------------*/
 
 /**
- * Gets info on the current user
+ * Gets info on the current user. Use of this function is not recommended. If
+ *   using caching functionality, the cache will be emptied when this function
+ *   is used. If possible, it is better to contribute to the caccl-api project
+ *   by adding the endpoint you want to use to the project.
  * @author Gabriel Abrams
  * @method endpoint
  * @memberof api.other
