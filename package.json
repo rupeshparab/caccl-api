@@ -1,6 +1,6 @@
 {
   "name": "caccl-api",
-  "version": "1.0.68",
+  "version": "1.0.68.1",
   "description": "A class that defines a set of smart Canvas endpoints that actually behave how you'd expect them to.",
   "main": "index.js",
   "scripts": {
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/harvard-edtech/caccl-canvas-api.git"
+    "url": "git+https://github.com/rupeshparab/caccl-canvas-api.git"
   },
   "keywords": [
     "Canvas",
@@ -18,12 +18,12 @@
     "smart",
     "CACCL"
   ],
-  "author": "Gabe Abrams <gabeabrams@gmail.com>",
+  "author": "Rupesh Parab <rupeshparab.rp@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/harvard-edtech/caccl-canvas-api/issues"
+    "url": "https://github.com/rupeshparab/caccl-canvas-api/issues"
   },
-  "homepage": "https://github.com/harvard-edtech/caccl-canvas-api#readme",
+  "homepage": "https://github.com/rupeshparab/caccl-canvas-api#readme",
   "devDependencies": {
     "docdash": "^1.2.0",
     "doctrine": "^2.1.0",
@@ -40,8 +40,8 @@
     "async": "^2.6.3",
     "axios": "^0.19.2",
     "caccl-error": "^1.0.6",
-    "caccl-send-request": "^1.0.14",
     "csv-parse": "^4.10.1",
+    "https": "^1.0.0",
     "parse-link-header": "^1.0.1",
     "path": "^0.12.7",
     "prop-types": "^15.7.2",

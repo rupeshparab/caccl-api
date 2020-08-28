@@ -1,8 +1,8 @@
 const parseLinkHeader = require('parse-link-header');
 const pathLib = require('path');
-const defaultSendRequest = require('caccl-send-request');
 const CACCLError = require('caccl-error');
 
+const defaultSendRequest = require('../cacclRequest');
 const errorCodes = require('../../errorCodes');
 const interpretCanvasError = require('./helpers/interpretCanvasError');
 const preProcessParams = require('./helpers/preProcessParams');
@@ -45,6 +45,8 @@ module.exports = (config = {}) => {
     maxPages,
     startPage,
     canvasHost,
+    proto,
+    basePath,
     apiPathPrefix,
     numRetries,
     cache,
@@ -143,6 +145,8 @@ module.exports = (config = {}) => {
               params: paramsWithPageNumber,
               path: apiPathPrefix + path,
               host: canvasHost,
+              proto,
+              basePath,
               // Ignore self-signed certificate if host is simulated Canvas
               ignoreSSLIssues: (canvasHost === 'localhost:8088'),
             })
