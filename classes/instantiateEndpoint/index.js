@@ -76,7 +76,7 @@ module.exports = (config = {}) => {
         ? defaults.numRetries
         : 3
     );
-    let { canvasHost, basePath } = options;
+    let { canvasHost, basePath, proto } = options;
     if (options.canvasHost === undefined) {
       canvasHost = (
         defaults.canvasHost === undefined
@@ -89,6 +89,7 @@ module.exports = (config = {}) => {
       uncache,
       canvasHost,
       basePath,
+      proto,
       authenticityToken,
       accessToken: (
         options.accessToken
