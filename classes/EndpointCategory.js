@@ -99,6 +99,7 @@ class EndpointCategory {
             numRetries: config.numRetries,
             sendRequest: config.sendRequest,
             canvasHost: config.canvasHost,
+            basePath: config.basePath,
           },
         });
       }
