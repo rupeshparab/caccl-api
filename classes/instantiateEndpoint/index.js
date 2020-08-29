@@ -50,6 +50,7 @@ module.exports = (config = {}) => {
     action,
     requiredParams,
     authenticityToken,
+    basePath,
   } = config;
   const defaults = (config.defaults || {});
 
@@ -76,7 +77,7 @@ module.exports = (config = {}) => {
         ? defaults.numRetries
         : 3
     );
-    let { canvasHost, basePath, proto } = options;
+    let { canvasHost, proto } = options;
     console.log('instantiateEndpoint options', options);
     console.log('instantiateEndpoint basePath', basePath);
     if (options.canvasHost === undefined) {
