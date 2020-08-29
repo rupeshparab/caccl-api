@@ -50,7 +50,6 @@ module.exports = (config = {}) => {
     action,
     requiredParams,
     authenticityToken,
-    basePath,
   } = config;
   const defaults = (config.defaults || {});
 
@@ -79,7 +78,7 @@ module.exports = (config = {}) => {
     );
     let { canvasHost, proto } = options;
     console.log('instantiateEndpoint options', options);
-    console.log('instantiateEndpoint basePath', basePath);
+    console.log('instantiateEndpoint basePath', defaults.basePath);
     if (options.canvasHost === undefined) {
       canvasHost = (
         defaults.canvasHost === undefined
@@ -91,7 +90,7 @@ module.exports = (config = {}) => {
       cache,
       uncache,
       canvasHost,
-      basePath,
+      basePath: defaults.basePath,
       proto,
       authenticityToken,
       accessToken: (
