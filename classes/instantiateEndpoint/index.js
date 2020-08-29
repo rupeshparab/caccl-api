@@ -77,6 +77,8 @@ module.exports = (config = {}) => {
         : 3
     );
     let { canvasHost, basePath, proto } = options;
+    console.log('instantiateEndpoint options', options);
+    console.log('instantiateEndpoint basePath', basePath);
     if (options.canvasHost === undefined) {
       canvasHost = (
         defaults.canvasHost === undefined

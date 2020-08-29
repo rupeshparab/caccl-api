@@ -54,6 +54,8 @@ module.exports = (config = {}) => {
     authenticityToken,
   } = config;
 
+  console.log('genVisitEndpoint config', config);
+
   // Set up sendRequest
   const sendRequest = (config.sendRequest || defaultSendRequest);
 

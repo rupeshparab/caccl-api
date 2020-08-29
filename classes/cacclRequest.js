@@ -59,6 +59,8 @@ const sendRequest = (options) => {
     url = `${proto}://${options.host}${options.path}${query}`;
   }
 
+  console.log('cacclRequest url', url);
+
   // Default ignoreSSLIssues
   const ignoreSSLIssues = (
     options.ignoreSSLIssues !== undefined

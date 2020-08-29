@@ -83,6 +83,8 @@ class EndpointCategory {
           || `perform an unnamed ${prop} task`
         );
 
+        console.log('EndpointCategory config', config)
+
         // Instantiate the endpoint
         this[prop] = instantiateEndpoint({
           action,
