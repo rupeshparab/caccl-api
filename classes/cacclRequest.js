@@ -45,10 +45,10 @@ const sendRequest = (options) => {
     arrayFormat: 'brackets',
   });
 
-  const proto = options.pro || 'https';
+  const proto = options.proto || 'https';
 
   // Create url (include query if GET)
-  const query = (method === 'GET' ? `?${stringifiedParams}` : '');
+  const query = `?${stringifiedParams}`;
   let url;
   if (!options.host && !options.basePath) {
     // No host included at all. Just send to a path
